@@ -1,34 +1,35 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
 	"os"
 
+	"github.com/chzyer/readline"
 	"github.com/spf13/cobra"
 )
 
+// https://github.com/manifoldco/promptui/issues/49#issuecomment-428801411
+type stderr struct{}
 
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "nested-prompt",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+func (s *stderr) Write(b []byte) (int, error) {
+	if len(b) == 1 && b[0] == 7 {
+		return 0, nil
+	}
+	return os.Stderr.Write(b)
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+func (s *stderr) Close() error {
+	return os.Stderr.Close()
+}
+
+var rootCmd = &cobra.Command{
+	Use:   "nested-prompt",
+	Short: "A CLI application that demonstrates how to use nested prompts in Cobra using promptui",
+	Long:  `A CLI application that demonstrates how to use nested prompts in Cobra using promptui.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -37,15 +38,6 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nested-prompt.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	readline.Stdout = &stderr{}
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-

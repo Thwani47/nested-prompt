@@ -50,6 +50,7 @@ var configCmd = &cobra.Command{
 
 		promptNested("Configuration Items", 0, items)
 
+		fmt.Println("")
 		for _, v := range items {
 			fmt.Printf("Saving configuration (%s) with value (%s)...\n", v.ID, v.Value)
 		}
